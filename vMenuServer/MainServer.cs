@@ -695,8 +695,9 @@ namespace vMenuServer
             }
             else
             {
-                var opacity = float.Parse(new Random().NextDouble().ToString());
-                var type = CloudTypes[new Random().Next(0, CloudTypes.Count)];
+                var random = new Random();
+                var opacity = (float)random.NextDouble();
+                var type = CloudTypes[random.Next(CloudTypes.Count)];
                 TriggerClientEvent("vMenu:SetClouds", opacity, type);
             }
         }
