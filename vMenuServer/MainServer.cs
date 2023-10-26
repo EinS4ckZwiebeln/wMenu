@@ -918,6 +918,12 @@ namespace vMenuServer
 
         #region Player join/quit
         private readonly HashSet<string> joinedPlayers = new();
+        private readonly List<Player> subscribedToNotifications = new();
+
+        private bool shouldReceiveNotifications(string handle)
+        {
+            return IsPlayerAceAllowed(handle, "vMenu.MiscSettings.JoinQuitNotifs") || IsPlayerAceAllowed(handle, "vMenu.MiscSettings.All");
+        }
 
         private Task PlayersFirstTick()
         {
@@ -926,6 +932,10 @@ namespace vMenuServer
             foreach (var player in Players)
             {
                 joinedPlayers.Add(player.Handle);
+                if (shouldReceiveNotifications(player.Handle))
+                {
+                    subscribedToNotifications.Add(player);
+                }
             }
 
             return Task.FromResult(0);
@@ -936,13 +946,14 @@ namespace vMenuServer
         {
             joinedPlayers.Add(sourcePlayer.Handle);
 
-            foreach (var player in Players)
+            if (shouldReceiveNotifications(sourcePlayer.Handle))
             {
-                if (IsPlayerAceAllowed(player.Handle, "vMenu.MiscSettings.JoinQuitNotifs") ||
-                    IsPlayerAceAllowed(player.Handle, "vMenu.MiscSettings.All"))
-                {
-                    player.TriggerEvent("vMenu:PlayerJoinQuit", sourcePlayer.Name, null);
-                }
+                subscribedToNotifications.Add(sourcePlayer);
+            }
+
+            foreach (var player in subscribedToNotifications)
+            {
+                player.TriggerEvent("vMenu:PlayerJoinQuit", sourcePlayer.Name, null);
             }
         }
 
@@ -956,13 +967,14 @@ namespace vMenuServer
 
             joinedPlayers.Remove(sourcePlayer.Handle);
 
-            foreach (var player in Players)
+            if (subscribedToNotifications.Contains(sourcePlayer))
             {
-                if (IsPlayerAceAllowed(player.Handle, "vMenu.MiscSettings.JoinQuitNotifs") ||
-                    IsPlayerAceAllowed(player.Handle, "vMenu.MiscSettings.All"))
-                {
-                    player.TriggerEvent("vMenu:PlayerJoinQuit", sourcePlayer.Name, reason);
-                }
+                subscribedToNotifications.Remove(sourcePlayer);
+            }
+
+            foreach (var player in subscribedToNotifications)
+            {
+                player.TriggerEvent("vMenu:PlayerJoinQuit", sourcePlayer.Name, reason);
             }
         }
         #endregion
