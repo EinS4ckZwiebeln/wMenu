@@ -60,10 +60,12 @@ namespace vMenuServer
     public class MainServer : BaseScript
     {
         #region vars
-        // Debug shows more information when doing certain things. Leave it off to improve performance!
-        public static bool DebugMode = GetResourceMetadata(GetCurrentResourceName(), "server_debug_mode", 0) == "true";
+        public static string resourceName = GetCurrentResourceName();
 
-        public static string Version { get { return GetResourceMetadata(GetCurrentResourceName(), "version", 0); } }
+        // Debug shows more information when doing certain things. Leave it off to improve performance!
+        public static bool DebugMode = GetResourceMetadata(resourceName, "server_debug_mode", 0) == "true";
+
+        public static string Version { get { return GetResourceMetadata(resourceName, "version", 0); } }
 
         // Time
         private int CurrentHours
@@ -189,10 +191,10 @@ namespace vMenuServer
         public MainServer()
         {
             // name check
-            if (GetCurrentResourceName() != "vMenu")
+            if (resourceName != "vMenu")
             {
                 var InvalidNameException = new Exception("\r\n\r\n^1[vMenu] INSTALLATION ERROR!\r\nThe name of the resource is not valid. " +
-                    "Please change the folder name from '^3" + GetCurrentResourceName() + "^1' to '^2vMenu^1' (case sensitive) instead!\r\n\r\n\r\n^7");
+                    "Please change the folder name from '^3" + resourceName + "^1' to '^2vMenu^1' (case sensitive) instead!\r\n\r\n\r\n^7");
                 try
                 {
                     throw InvalidNameException;
@@ -221,7 +223,7 @@ namespace vMenuServer
                 EventHandlers.Add("vMenu:RequestServerState", new Action<Player>(RequestServerStateFromPlayer));
 
                 // check addons file for errors
-                var addons = LoadResourceFile(GetCurrentResourceName(), "config/addons.json") ?? "{}";
+                var addons = LoadResourceFile(resourceName, "config/addons.json") ?? "{}";
                 try
                 {
                     JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(addons);
@@ -470,7 +472,7 @@ namespace vMenuServer
                     }
                     else if (args[0].ToString().ToLower() == "migrate" && source < 1)
                     {
-                        var file = LoadResourceFile(GetCurrentResourceName(), "bans.json");
+                        var file = LoadResourceFile(resourceName, "bans.json");
                         if (string.IsNullOrEmpty(file) || file == "[]")
                         {
                             Debug.WriteLine("&1[vMenu] [ERROR]^7 No bans.json file found or it's empty.");
@@ -844,7 +846,7 @@ namespace vMenuServer
             //if (GetConvar("vMenuLogKickActions", "true") == "true")
             if (GetSettingsBool(Setting.vmenu_log_kick_actions))
             {
-                var file = LoadResourceFile(GetCurrentResourceName(), "vmenu.log") ?? "";
+                var file = LoadResourceFile(resourceName, "vmenu.log") ?? "";
                 var date = DateTime.Now;
                 var formattedDate = (date.Day < 10 ? "0" : "") + date.Day + "-" +
                     (date.Month < 10 ? "0" : "") + date.Month + "-" +
@@ -853,7 +855,7 @@ namespace vMenuServer
                     (date.Minute < 10 ? "0" : "") + date.Minute + ":" +
                     (date.Second < 10 ? "0" : "") + date.Second;
                 var outputFile = file + $"[\t{formattedDate}\t] [KICK ACTION] {kickLogMesage}\n";
-                SaveResourceFile(GetCurrentResourceName(), "vmenu.log", outputFile, -1);
+                SaveResourceFile(resourceName, "vmenu.log", outputFile, -1);
                 Debug.WriteLine("^3[vMenu] [KICK]^7 " + kickLogMesage + "\n");
             }
         }
@@ -872,7 +874,7 @@ namespace vMenuServer
             }
             var locs = GetLocations();
             locs.teleports.Add(location);
-            if (!SaveResourceFile(GetCurrentResourceName(), "config/locations.json", JsonConvert.SerializeObject(locs, Formatting.Indented), -1))
+            if (!SaveResourceFile(resourceName, "config/locations.json", JsonConvert.SerializeObject(locs, Formatting.Indented), -1))
             {
                 Log("Could not save locations.json file, reason unknown.", LogLevel.error);
             }
