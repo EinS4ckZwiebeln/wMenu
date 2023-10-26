@@ -628,29 +628,30 @@ namespace vMenuServer
         /// </summary>
         private void RefreshWeather()
         {
-            var random = new Random().Next(20);
-            if (CurrentWeather is "RAIN" or "THUNDER")
+            switch (CurrentWeather)
             {
-                CurrentWeather = "CLEARING";
+                case "RAIN":
+                    CurrentWeather = "CLEARING";
+                    break;
+                case "THUNDER":
+                    CurrentWeather = "CLEARING";
+                    break;
+                case "CLEARING":
+                    CurrentWeather = "CLOUDS";
+                    break;
+                default:
+                    var random = new Random().Next(20);
+                    CurrentWeather = random switch
+                    {
+                        >= 0 and <= 5 => CurrentWeather == "EXTRASUNNY" ? "CLEAR" : "EXTRASUNNY",
+                        >= 6 and <= 8 => CurrentWeather == "SMOG" ? "FOGGY" : "SMOG",
+                        >= 9 and <= 14 => CurrentWeather == "CLOUDS" ? "OVERCAST" : "CLOUDS",
+                        15 => CurrentWeather == "OVERCAST" ? "THUNDER" : "OVERCAST",
+                        16 => CurrentWeather == "CLOUDS" ? "EXTRASUNNY" : "RAIN",
+                        _ => CurrentWeather == "FOGGY" ? "SMOG" : "FOGGY",
+                    };
+                    break;
             }
-            else if (CurrentWeather == "CLEARING")
-            {
-                CurrentWeather = "CLOUDS";
-            }
-            else
-            {
-                CurrentWeather = random switch
-                {
-                    0 or 1 or 2 or 3 or 4 or 5 => CurrentWeather == "EXTRASUNNY" ? "CLEAR" : "EXTRASUNNY",
-                    6 or 7 or 8 => CurrentWeather == "SMOG" ? "FOGGY" : "SMOG",
-                    9 or 10 or 11 => CurrentWeather == "CLOUDS" ? "OVERCAST" : "CLOUDS",
-                    12 or 13 or 14 => CurrentWeather == "CLOUDS" ? "OVERCAST" : "CLOUDS",
-                    15 => CurrentWeather == "OVERCAST" ? "THUNDER" : "OVERCAST",
-                    16 => CurrentWeather == "CLOUDS" ? "EXTRASUNNY" : "RAIN",
-                    _ => CurrentWeather == "FOGGY" ? "SMOG" : "FOGGY",
-                };
-            }
-
         }
         #endregion
 
