@@ -62,6 +62,8 @@ namespace vMenuServer
         #region vars
         public static string resourceName = GetCurrentResourceName();
 
+        public static bool OneSyncInfinity = GetConvar("onesync_enableInfinity", "false") == "true";
+
         // Debug shows more information when doing certain things. Leave it off to improve performance!
         public static bool DebugMode = GetResourceMetadata(resourceName, "server_debug_mode", 0) == "true";
 
@@ -889,7 +891,7 @@ namespace vMenuServer
         {
             player.TriggerEvent("vMenu:SetServerState", new
             {
-                IsInfinity = GetConvar("onesync_enableInfinity", "false") == "true"
+                IsInfinity = OneSyncInfinity
             });
         }
 
